@@ -4,6 +4,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 from decimal import Decimal
+from app.exceptions import ValidationError
+
+
 
 
 class Operation(ABC):
@@ -127,7 +130,120 @@ class Multiply(Operation):
         return a * b
     
 
+class Divide(Operation):
+    """
+    Division operation.
+
+    Performs division of two Decimal numbers.
+        
+    """
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands before execution.
+
+        This can be overridden by subclasses to add 
+        specific validation rules for different operations.
+
+        args:
+            a (Decimal): The dividend.
+            b (Decimal): The divisor.
+        
+        raises:
+            ValueError: If the operands are invalid.
+        """
+        super().validate_operands(a, b)
+        if b == 0:
+            raise ValidationError("Division by zero is not allowed.")
+        
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Divide a by b.
+
+        args:
+            a (Decimal): The dividend.
+            b (Decimal): The divisor. 
+
+        Returns:
+            Decimal: The result of a divided by b.    
+
+        raises:
+            ValidationError: If the divisor is zero.
+        """
+        self.validate_operands(a, b)
+        return a / b
+    
 
         
+class Power(Operation):
+    """
+    Power operation.
+
+    Raises the first Decimal number to the power of the second.
         
-  
+    """
+   
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands before execution.
+
+        This can be overridden by subclasses to add 
+        specific validation rules for different operations.
+
+        args:
+            a (Decimal): The base.
+            b (Decimal): The exponent.
+        
+        raises:
+            ValueError: If the operands are invalid.
+        """
+        super().validate_operands(a, b)
+        if b < 0:
+            raise ValidationError("Exponent must be non-negative.")
+        
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Raise a to the power of b.
+
+        args:
+            a (Decimal): The base.
+            b (Decimal): The exponent. 
+
+        Returns:
+            Decimal: The result of a raised to the power of b.    
+
+        raises:
+            ValidationError: If the exponent is negative.
+        """
+        self.validate_operands(a, b)
+        return Decimal(pow(float(a), float(b)))
+        
+class Root(Operation):
+    """
+    Root operation.
+
+    Calculates the nth root of a Decimal number.
+        
+    """
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands before execution.
+
+        This can be overridden by subclasses to add 
+        specific validation rules for different operations.
+
+        args:
+            a (Decimal): The number to find the root of.
+            b (Decimal): The degree of the root.
+
+        raises:
+            ValidationError: If the number is negative or the root degree is zero.
+
+        """
+        super().validate_operands(a, b)
+        if a < 0:
+            raise ValidationError("cannot calculate root of a negative number.")
+        if b == 0:
+            raise ValidationError("Zero root is not defined.")
+
+
