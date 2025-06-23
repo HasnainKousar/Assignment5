@@ -177,9 +177,13 @@ def run_calculator_repl():
         logging.error(f"Calculator initialization failed: {e}")
         raise
 
-if __name__ == "__main__":
-    # Run the calculator REPL if this script is executed directly
-    run_calculator_repl()
+
+# if you want to run the REPL directly, uncomment the following lines:
+# if __name__ == "__main__":
+#     # Run the calculator REPL if this script is executed directly
+#     run_calculator_repl()
+
+
 
 
 
