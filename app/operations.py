@@ -63,7 +63,7 @@ class Operation(ABC):
         return self.__class__.__name__
     
 
-class Add(Operation):
+class Addition(Operation):
     """
     Addition operation.
 
@@ -85,7 +85,7 @@ class Add(Operation):
         self.validate_operands(a, b)
         return a + b
         
-class Subtract(Operation):
+class Subtraction(Operation):
     """
     Subtraction operation.
 
@@ -107,7 +107,7 @@ class Subtract(Operation):
         self.validate_operands(a, b)
         return a - b
     
-class Multiply(Operation):
+class Multiplication(Operation):
     """
     Multiplication operation.
 
@@ -130,7 +130,7 @@ class Multiply(Operation):
         return a * b
     
 
-class Divide(Operation):
+class Division(Operation):
     """
     Division operation.
 
@@ -246,4 +246,58 @@ class Root(Operation):
         if b == 0:
             raise ValidationError("Zero root is not defined.")
 
+
+class OperationFactory:
+    """
+    Factory class to create operation instances based on the operation name.
+    """
+
+    _operations: Dict[str, type] = {
+        "add": Addition,
+        "subtract": Subtraction,
+        "multiply": Multiplication,
+        "divide": Division,
+        "power": Power,
+        "root": Root
+    }
+
+    @classmethod
+    def register_operation(cls, name: str, operation_class: type) -> None:
+        """
+        Register a new operation class.
+
+        args:
+            name (str): The name of the operation.
+            operation_class (type): The class implementing the operation.
+
+        raises:
+            TypeError: If operation_class is not a subclass of Operation.
+
+        """
+        if not issubclass(operation_class, Operation):
+            raise TypeError("Operation class must inherit from Operation.")
+        cls._operations[name] = operation_class
+
+    @classmethod
+    def create_operation(cls, operation_type: str) -> Operation:
+        """
+        Create an operation instance based on the operation type.
+
+        This method retrieves the appropriate operation class from the
+        _operations dictionary and returns an instance of it.
+
+        Args:
+            operation_type (str): The type of operation to create (e.g., "add", "subtract").
+
+        Returns:
+            Operation: An instance of the requested operation class.
+
+        Raises:
+            ValueError: If the operation type is not recognized.
+        """
+        operation_class = cls._operations.get(operation_type)
+        if not operation_class:
+            raise ValueError(f"Operation '{operation_type}' is not supported.")
+        return operation_class()
+    
 
