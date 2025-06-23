@@ -27,5 +27,24 @@ class ValidationError(CalculatorError):
     """
     pass
 
+class OperationError(CalculatorError):
+    """
+    Raised when a calculation operation fails.
+
+    This exception is used to indicate failure during the execution of 
+    arthmetic operations, such as division by zero or invalid operations.
+
+    """
+    pass
+
+class configurationError(CalculatorError):
+    """
+    Raised when there is a configuration issue.
+
+    This exception is used to indicate that there is a problem with the 
+    configuration of the calculator, such as missing or invalid settings.
+
+    """
+    pass
 
 
