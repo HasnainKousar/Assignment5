@@ -97,7 +97,7 @@ class Calculation:
 
         This method is used to raise an OperationError when a negative power is attempted.
         """
-        raise OperationError("Cannot calculate power with a negative exponent.")
+        raise OperationError("Exponent must be non-negative.")
     
     @staticmethod
     def _raise_invalid_root(a: Decimal, b: Decimal): # pragma: no cover
@@ -115,7 +115,7 @@ class Calculation:
         if b == 0:
             raise OperationError("Zero root is not defined.")
         if a < 0:
-            raise OperationError("Cannot calculate root of a negative number.")
+            raise OperationError("cannot calculate root of a negative number.")
         raise OperationError("Invalid root operation.")
     
 
@@ -171,12 +171,12 @@ class Calculation:
             if calc.result != saved_result:
                 logging.warning(
                     f'Loaded calculation result {saved_result} '
-                    f'differs from compared result {calc.result}'
+                    f'differs from computed result {calc.result}'
                 ) # pragma: no cover
 
             return calc
         except (KeyError, ValueError, InvalidOperation) as e:
-            raise OperationError(f"Invalid data for Calculation: {str(e)}")
+            raise OperationError(f"Invalid calculation data: {str(e)}")
         
         
     def __str__(self) -> str:
@@ -258,4 +258,3 @@ class Calculation:
         except InvalidOperation:  # pragma: no cover
             return str(self.result)
         
-
