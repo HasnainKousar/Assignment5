@@ -37,7 +37,7 @@ class OperationError(CalculatorError):
     """
     pass
 
-class configurationError(CalculatorError):
+class ConfigurationError(CalculatorError):
     """
     Raised when there is a configuration issue.
 
