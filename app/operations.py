@@ -153,7 +153,7 @@ class Division(Operation):
         """
         super().validate_operands(a, b)
         if b == 0:
-            raise ValidationError("Division by zero is not allowed.")
+            raise ValidationError("Division by zero is not allowed")
         
     def execute(self, a: Decimal, b: Decimal) -> Decimal:
         """
@@ -245,6 +245,25 @@ class Root(Operation):
             raise ValidationError("cannot calculate root of a negative number.")
         if b == 0:
             raise ValidationError("Zero root is not defined.")
+        
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the nth root of a.
+
+        args:
+            a (Decimal): The number to find the root of.
+            b (Decimal): The degree of the root. 
+
+        Returns:
+            Decimal: The nth root of a.
+
+        raises:
+            ValidationError: If the number is negative or the root degree is zero.
+        """
+        self.validate_operands(a, b)
+        return Decimal(pow(float(a), 1 / float(b)))
+    
+
 
 
 class OperationFactory:
