@@ -112,6 +112,20 @@ def test_equality():
     assert calc1 != calc3
 
 
+def test_equality_with_non_calculation():
+    """Test equality comparison with non-Calculation objects."""
+    calc = Calculation(operation="Addition", operand1=Decimal('5.0'), operand2=Decimal('3.0'))
+    
+    
+    # Test equality with different types of objects to trigger line 230
+    assert calc != "not a calculation"
+    assert calc != 42
+    
+    # Also test the != operator explicitly
+    assert not (calc == "string")
+    assert not (calc == 123)
+
+
 def test_from_dict_result_mismatch(caplog):
     #arrange
     data = {
@@ -130,6 +144,26 @@ def test_from_dict_result_mismatch(caplog):
     assert "Loaded calculation result 6 differs from computed result 5" in caplog.text
 
 
+def test_str_representation():
+    """Test the string representation of a Calculation object."""
+    calc = Calculation(operation="Addition", operand1=Decimal('5.0'), operand2=Decimal('3.0'))
+    expected_str = "Addition(5.0, 3.0) = 8.0"
+    assert str(calc) == expected_str
+
+
+def test_repr_representation():
+    """Test the repr representation of a Calculation object."""
+    calc = Calculation(operation="Addition", operand1=Decimal('5.0'), operand2=Decimal('3.0'))
+    repr_str = repr(calc)
+    
+    # Check that the repr contains all the expected components
+    assert "Calculation(operation='Addition'" in repr_str
+    assert "operand1=5.0" in repr_str
+    assert "operand2=3.0" in repr_str
+    assert "result=8.0" in repr_str
+    assert "timestamp=" in repr_str
+
+
 def test_calculation_failed_exception():
     """Test that calculation failures are properly handled with OperationError."""
     # This test aims to trigger the exception handling on line 81 of calculation.py
@@ -143,4 +177,6 @@ def test_calculation_failed_exception():
             operand1=Decimal('1e308'), 
             operand2=Decimal('1e308')
         )
+
+
 
