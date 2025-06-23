@@ -295,7 +295,7 @@ class OperationFactory:
         """
         if not issubclass(operation_class, Operation):
             raise TypeError("Operation class must inherit from Operation.")
-        cls._operations[name] = operation_class
+        cls._operations[name.lower()] = operation_class
 
     @classmethod
     def create_operation(cls, operation_type: str) -> Operation:
@@ -314,9 +314,9 @@ class OperationFactory:
         Raises:
             ValueError: If the operation type is not recognized.
         """
-        operation_class = cls._operations.get(operation_type)
+        operation_class = cls._operations.get(operation_type.lower())
         if not operation_class:
-            raise ValueError(f"Operation '{operation_type}' is not supported.")
+            raise ValueError(f"Unknown Operation: {operation_type}")
         return operation_class()
     
 
