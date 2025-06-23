@@ -79,3 +79,88 @@ def test_invalid_max_input_value():
         config = CalculatorConfig(max_input_value = -1)
         config.validate()
 
+
+def test_auto_save_env_var_true():
+    
+    os.environ['CALCULATOR_AUTO_SAVE'] = 'true'
+    config = CalculatorConfig(auto_save=None)
+    assert config.auto_save is True
+
+
+
+def test_auto_save_env_var_false():
+    os.environ['CALCULATOR_AUTO_SAVE'] = 'false'
+    config = CalculatorConfig(auto_save=None)
+    assert config.auto_save is False
+
+
+def test_auto_save_env_var_is_one():
+    os.environ['CALCULATOR_AUTO_SAVE'] = '1'
+    config = CalculatorConfig(auto_save=None)
+    assert config.auto_save is True
+
+def test_auto_save_env_var_is_zero():
+    os.environ['CALCULATOR_AUTO_SAVE'] = '0'
+    config = CalculatorConfig(auto_save=None)
+    assert config.auto_save is False
+
+
+def test_enviroment_overrides():
+    config = CalculatorConfig()
+    assert config.max_history_size == 500
+    assert config.auto_save is False
+    assert config.precision == 4
+    assert config.max_input_value == Decimal('1000')
+    assert config.default_encoding == 'utf-16'
+
+
+def test_default_fallbacks():
+    #clear all related environment variables and test defaults
+    clear_env_vars(
+        'CALCULATOR_MAX_HISTORY_SIZE',
+        'CALCULATOR_AUTO_SAVE',
+        'CALCULATOR_PRECISION',
+        'CALCULATOR_MAX_INPUT_VALUE',
+        'CALCULATOR_DEFAULT_ENCODING'
+    )
+
+    config = CalculatorConfig()
+    assert config.max_history_size == 1000
+    assert config.auto_save is True
+    assert config.precision == 10
+    assert config.max_input_value == Decimal('1000000')
+    assert config.default_encoding == 'utf-8'
+
+def test_get_project_root():
+    """Test if get_project_root returns the correct path."""
+    from app.calculator_config import get_project_root
+    assert (get_project_root() / 'app').exists()
+
+
+def test_log_dir_property():
+    # clear the environment variable to test default behavior
+    clear_env_vars('CALCULATOR_LOG_DIR')
+    config = CalculatorConfig(base_dir=Path('/new_base_dir'))
+    assert config.log_dir == Path('/new_base_dir/logs').resolve()
+
+def test_history_dir_property():
+    # clear the environment variable to test default behavior
+    clear_env_vars('CALCULATOR_HISTORY_DIR')
+    config = CalculatorConfig(base_dir=Path('/new_base_dir'))
+    assert config.history_dir == Path('/new_base_dir/history').resolve()
+
+
+def test_history_file_property():
+    # clear the environment variable to test default behavior
+    clear_env_vars('CALCULATOR_HISTORY_FILE')
+    config = CalculatorConfig(base_dir=Path('/new_base_dir'))
+    assert config.history_file == Path('/new_base_dir/history/calculator_history.csv').resolve()
+
+
+def test_log_file_property():
+    # clear the environment variable to test default behavior
+    clear_env_vars('CALCULATOR_LOG_FILE')
+    config = CalculatorConfig(base_dir=Path('/new_base_dir'))
+    assert config.log_file == Path('/new_base_dir/logs/calculator.log').resolve()
+
+
