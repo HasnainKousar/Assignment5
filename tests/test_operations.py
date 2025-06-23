@@ -177,5 +177,54 @@ class TestRoot(BaseOperationTest):
         },
     }
 
+class TestOperationFactory:
+    """ Test OperationFactory functionality. """
 
+    def test_create_valid_operations(self):
+        """ Test creating valid operations. """
+        operation_map = {
+            "add": Addition,
+            "subtract": Subtraction,
+            "multiply": Multiplication,
+            "divide": Division,
+            "power": Power,
+            "root": Root
+        }   
+
+        for op_name, op_class in operation_map.items():
+            operation = OperationFactory.create_operation(op_name)
+            assert isinstance(operation, op_class)
+
+            operation = OperationFactory.create_operation(op_name.upper())
+            assert isinstance(operation, op_class)
+
+    def test_create_invalid_operation(self):
+        """ Test creating an invalid operation. """
+        with pytest.raises(ValueError, match="Unknown Operation: invalid_op"):
+            OperationFactory.create_operation("invalid_op")
+
+    
+    def test_register_valid_operation(self):
+        """ Test registering a valid operation. """
+        class NewOperation(Operation):
+            def execute(self, a: Decimal, b: Decimal) -> Decimal:
+                return a 
+            
+        OperationFactory.register_operation("new_op", NewOperation)
+        operation = OperationFactory.create_operation("new_op")
+        assert isinstance(operation, NewOperation)
+
+    def test_register_invalid_operation(self):
+        """ Test registering an invalid operation. """
+        class InvalidOperation:
+            pass
+
+        with pytest.raises(TypeError, match="Operation class must inherit from Operation."):
+            OperationFactory.register_operation("invalid_op", InvalidOperation)
+
+
+
+
+
+    
     
