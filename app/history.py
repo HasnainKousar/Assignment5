@@ -50,9 +50,9 @@ class LoggingObserver(HistoryObserver):
         if calculation is None:
             raise AttributeError("Calculation cannot be None")
         logging.info(
-            f"Calculation performed: {calculation.operation} "
+            f"Calculation performed: {calculation.operation.lower()} "
             f"({calculation.operand1}, {calculation.operand2}) = "
-            f"{calculation.result} "
+            f"{calculation.result}"
         )
 
 
