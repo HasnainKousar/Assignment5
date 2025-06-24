@@ -445,6 +445,348 @@ def test_get_history_dataframe_empty(calculator):
 
 
 
+@patch('builtins.input', side_effect=['add', '2', '3', 'undo', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_undo_success(mock_calculator_class, mock_print, mock_input):
+    """Test REPL undo command when successful (lines 89-90)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.set_operation = Mock()
+    mock_calc.perform_calculation.return_value = 5
+    mock_calc.undo.return_value = True  # Undo successful
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify undo was called
+    mock_calc.undo.assert_called_once()
+    # Verify the correct message for successful undo
+    mock_print.assert_any_call("Last operation undone.")
+
+
+
+@patch('builtins.input', side_effect=['undo', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_undo_failure(mock_calculator_class, mock_print, mock_input):
+    """Test REPL undo command when no operation to undo (lines 91-92)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.undo.return_value = False  # No operation to undo
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify undo was called
+    mock_calc.undo.assert_called_once()
+    # Verify the correct message for failed undo
+    mock_print.assert_any_call("No operation to undo.")
+
+
+
+@patch('builtins.input', side_effect=['add', '2', '3', 'undo', 'redo', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_redo_success(mock_calculator_class, mock_print, mock_input):
+    """Test REPL redo command when successful (lines 97-98)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.set_operation = Mock()
+    mock_calc.perform_calculation.return_value = 5
+    mock_calc.undo.return_value = True
+    mock_calc.redo.return_value = True  # Redo successful
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify redo was called
+    mock_calc.redo.assert_called_once()
+    # Verify the correct message for successful redo
+    mock_print.assert_any_call("Last operation redone.")
+
+
+
+@patch('builtins.input', side_effect=['redo', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_redo_failure(mock_calculator_class, mock_print, mock_input):
+    """Test REPL redo command when no operation to redo (lines 99-100)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.redo.return_value = False  # No operation to redo
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify redo was called
+    mock_calc.redo.assert_called_once()
+    # Verify the correct message for failed redo
+    mock_print.assert_any_call("No operation to redo.")
+
+
+
+@patch('builtins.input', side_effect=['load', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_load_success(mock_calculator_class, mock_print, mock_input):
+    """Test REPL load command when successful (lines 105-107)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.load_history = Mock()  # Load successful (no exception)
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify load_history was called
+    mock_calc.load_history.assert_called()
+    # Verify the correct message for successful load
+    mock_print.assert_any_call("History loaded successfully.")
+
+
+
+@patch('builtins.input', side_effect=['load', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_load_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL load command when error occurs (lines 108-109)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.load_history.side_effect = Exception("Load failed")  # Load fails
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify load_history was called
+    mock_calc.load_history.assert_called_once()
+    # Verify the correct error message
+    mock_print.assert_any_call("Error loading history: Load failed")
+
+
+@patch('builtins.input', side_effect=['save', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_save_success(mock_calculator_class, mock_print, mock_input):
+    """Test REPL save command when successful."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.save_history = Mock()  # Save successful (no exception)
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify save_history was called (once for the command, once for exit)
+    assert mock_calc.save_history.call_count >= 1
+    # Verify the correct message for successful save
+    mock_print.assert_any_call("History saved successfully.")
+
+
+
+@patch('builtins.input', side_effect=['save', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_save_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL save command when error occurs (lines 117-118)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    # Make save_history fail when called explicitly but succeed on exit
+    call_count = 0
+    def save_side_effect():
+        nonlocal call_count
+        call_count += 1
+        if call_count == 1:
+            raise Exception("Save failed")
+        # Let subsequent calls (exit) succeed
+        return None
+    
+    mock_calc.save_history.side_effect = save_side_effect
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify save_history was called
+    assert mock_calc.save_history.call_count >= 1
+    # Verify the correct error message
+    mock_print.assert_any_call("Error saving history: Save failed")
+
+@patch('builtins.input', side_effect=['add', 'cancel', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_operation_cancel_first_number(mock_calculator_class, mock_print, mock_input):
+    """Test REPL arithmetic operation cancelled on first number input (lines 127-128)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct message for cancelled operation
+    mock_print.assert_any_call("Operation cancelled.")
+    # Verify that perform_calculation was never called since operation was cancelled
+    mock_calc.perform_calculation.assert_not_called()
+
+@patch('builtins.input', side_effect=['add', '2', 'cancel', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_operation_cancel_second_number(mock_calculator_class, mock_print, mock_input):
+    """Test REPL arithmetic operation cancelled on second number input (lines 133-134)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct message for cancelled operation
+    mock_print.assert_any_call("Operation cancelled.")
+    # Verify that perform_calculation was never called since operation was cancelled
+    mock_calc.perform_calculation.assert_not_called()
+
+@patch('builtins.input', side_effect=['add', '2', '3', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_operation_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL arithmetic operation with OperationError."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.set_operation = Mock()
+    mock_calc.perform_calculation.side_effect = OperationError("Division by zero")
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct error message for OperationError
+    mock_print.assert_any_call("Error: Division by zero")
+
+@patch('builtins.input', side_effect=['add', '2', '3', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_validation_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL arithmetic operation with ValidationError."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.set_operation = Mock()
+    mock_calc.perform_calculation.side_effect = ValidationError("Invalid input")
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct error message for ValidationError
+    mock_print.assert_any_call("Error: Invalid input")
+
+@patch('builtins.input', side_effect=['add', '2', '3', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_unexpected_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL arithmetic operation with unexpected exception."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calc.set_operation = Mock()
+    mock_calc.perform_calculation.side_effect = RuntimeError("Unexpected error")
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct error message for unexpected exception
+    mock_print.assert_any_call("An unexpected error occurred: Unexpected error")
+
+@patch('builtins.input', side_effect=['invalidcommand', 'exit'])
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_unknown_command(mock_calculator_class, mock_print, mock_input):
+    """Test REPL unknown command handling (line 158)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct message for unknown command
+    mock_print.assert_any_call("Unknown command: invalidcommand. Type 'help' for a list of commands.")
+
+@patch('builtins.input', side_effect=KeyboardInterrupt())
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_keyboard_interrupt(mock_calculator_class, mock_print, mock_input):
+    """Test REPL KeyboardInterrupt handling (lines 160, 162)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    # Mock input to raise KeyboardInterrupt first, then 'exit'
+    with patch('builtins.input') as mock_input_patch:
+        mock_input_patch.side_effect = [KeyboardInterrupt(), 'exit']
+        run_calculator_repl()
+    
+    # Verify the correct message for KeyboardInterrupt
+    mock_print.assert_any_call("\nOperation cancelled")
+
+@patch('builtins.input', side_effect=EOFError())
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_eof_error(mock_calculator_class, mock_print, mock_input):
+    """Test REPL EOFError handling (lines 165, 167)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    run_calculator_repl()
+    
+    # Verify the correct message for EOFError
+    mock_print.assert_any_call("\nInput terminated. Exiting the calculator REPL.")
+
+@patch('builtins.input', side_effect=RuntimeError("Command processing error"))
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_general_exception(mock_calculator_class, mock_print, mock_input):
+    """Test REPL general exception handling in main loop (lines 169, 171)."""
+    # Create a mock calculator instance
+    mock_calc = Mock()
+    mock_calc.add_observer = Mock()
+    mock_calculator_class.return_value = mock_calc
+    
+    # Mock input to raise an exception first, then 'exit'
+    with patch('builtins.input') as mock_input_patch:
+        mock_input_patch.side_effect = [RuntimeError("Command processing error"), 'exit']
+        run_calculator_repl()
+    
+    # Verify the correct message for general exception
+    mock_print.assert_any_call("An unexpected error occurred: Command processing error")
+
+@patch('builtins.print')
+@patch('app.calculator_repl.Calculator')
+def test_run_calculator_repl_initialization_error(mock_calculator_class, mock_print):
+    """Test REPL initialization error handling (lines 174, 176)."""
+    # Make Calculator initialization raise an exception
+    mock_calculator_class.side_effect = Exception("Calculator initialization failed")
+    
+    with pytest.raises(Exception, match="Calculator initialization failed"):
+        run_calculator_repl()
+    
+    # Verify the correct error message for initialization failure
+    mock_print.assert_any_call("An error occurred while starting the calculator: Calculator initialization failed")
+
+
+
+
+
+
+
 
 
 
