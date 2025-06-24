@@ -219,7 +219,7 @@ def test_load_history(mock_exists, mock_read_csv, calculator):
     except OperationError:
         pytest.fail("Loading history raised an OperationError unexpectedly.")
 
-
+# Test for clearing history
 def test_clear_history(calculator):
     """Test that clearing the history works correctly."""
     operation = OperationFactory.create_operation('add')
@@ -231,9 +231,9 @@ def test_clear_history(calculator):
     assert calculator.redo_stack == []
 
 
-
+#################################
 # Test running the REPL
-
+#################################
 
 #test running the REPL with valid commands
 @patch('builtins.input', side_effect=['exit'])
